@@ -97,7 +97,7 @@ async function main() {
       }
 
       jwt = await core.handleAction(signAction)
-      jwt = encodeURI('http://localhost:8099/ssi?c_i=') + jwt
+      // jwt = encodeURI('http://localhost:8099/ssi?c_i=') + jwt
     } else {
       name = await dataStore.shortId(did)
     }
