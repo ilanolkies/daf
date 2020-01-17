@@ -11,6 +11,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@types/pg": "^7.14.1",
     "apollo-server": "^2.9.16",
     "daf-core": "^1.4.0",
     "daf-data-store": "^1.4.1",
@@ -23,6 +24,7 @@
     "daf-w3c": "^1.4.0",
     "graphql": "^14.5.8",
     "lodash.merge": "^4.6.2",
+    "pg": "^7.17.1",
     "ws": "^7.2.1"
   },
   "devDependencies": {

@@ -12,6 +12,7 @@ import { DafResolver } from 'daf-resolver'
 import { ApolloServer } from 'apollo-server'
 import merge from 'lodash.merge'
 import ws from 'ws'
+import { NodePg } from './daf-pg-db'
 
 TG.ServiceController.webSocketImpl = ws
 
@@ -41,7 +42,9 @@ export const core = new Daf.Core({
   actionHandler,
 })
 
-const dataStore = new DS.DataStore(new NodeSqlite3('./data-store.sqlite3'))
+// const dataStore = new DS.DataStore(new NodeSqlite3('./data-store.sqlite3'))
+const db = new NodePg('postgres://simonas@localhost:5432/simonas')
+const dataStore = new DS.DataStore(db)
 
 const server = new ApolloServer({
   typeDefs: [
@@ -79,6 +82,7 @@ core.on(Daf.EventTypes.validatedMessage, async (message: Daf.Message) => {
 })
 
 const main = async () => {
+  await db.initialize()
   await dataStore.initialize()
   await core.setupServices()
   await core.listen()
