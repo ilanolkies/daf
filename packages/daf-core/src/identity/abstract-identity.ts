@@ -9,4 +9,4 @@ export abstract class AbstractIdentity {
 }
 
 type AbstractIdentityClass = typeof AbstractIdentity
-export interface IdentityDerived extends AbstractIdentityClass {}
+export type IdentityDerived = AbstractIdentityClass

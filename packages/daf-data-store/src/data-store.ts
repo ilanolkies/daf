@@ -270,7 +270,7 @@ export class DataStore {
   }
 
   async interactionCount(did1: string, did2: string) {
-    let query = sql
+    const query = sql
       .select('count(*) as count')
       .from('messages')
       .where(
@@ -283,7 +283,7 @@ export class DataStore {
   }
 
   async latestMessageTimestamps() {
-    let query = `SELECT * FROM ( SELECT m."timestamp", m.receiver AS did, md. "type" , md.id FROM messages AS m
+    const query = `SELECT * FROM ( SELECT m."timestamp", m.receiver AS did, md. "type" , md.id FROM messages AS m
       LEFT JOIN messages_meta_data AS md ON m.id = md.message_id order by m.timestamp desc) GROUP BY did, "type", id`
 
     return await this.db.rows(query, [])

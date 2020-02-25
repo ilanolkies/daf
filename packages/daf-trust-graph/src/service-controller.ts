@@ -24,7 +24,7 @@ export class ServiceController extends AbstractServiceController {
 
   private client?: ApolloClient<any>
 
-  private uri: string = ''
+  private uri = ''
   private wsUri?: string
 
   public instanceId() {
@@ -54,7 +54,7 @@ export class ServiceController extends AbstractServiceController {
     debug('WSURI', this.wsUri)
 
     const httpLink = new HttpLink({ uri: this.uri })
-    var link = null
+    let link = null
 
     if (this.wsUri) {
       const wsClient = new SubscriptionClient(

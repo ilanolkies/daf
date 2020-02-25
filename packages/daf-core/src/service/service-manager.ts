@@ -60,7 +60,7 @@ export class ServiceManager extends EventEmitter {
     for (const instance of this.controllerInstances) {
       const { id, type, did } = instance.instanceId()
       const found = ts.find(i => i.did === did && i.id === id && i.type === type)
-      let since = found ? found.timestamp : 0
+      const since = found ? found.timestamp : 0
       const messages = await instance.getMessagesSince(since)
       result = result.concat(messages)
     }

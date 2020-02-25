@@ -64,11 +64,11 @@ export class DIDComm {
     msg: string,
     recipientKeys: Uint8Array[],
     senderKeys: sodium.KeyPair,
-    nonRepudiable: Boolean = false,
+    nonRepudiable = false,
   ): Promise<string> {
     if (nonRepudiable) {
       //return JWE(JWS(msg))
-      let signedMsg = await this.signContent(msg, senderKeys)
+      const signedMsg = await this.signContent(msg, senderKeys)
       return this.packMessage(signedMsg, recipientKeys, senderKeys)
     } else {
       // return (JWE(msg))
@@ -105,7 +105,7 @@ export class DIDComm {
     try {
       return await this.unpackEncrypted(packedMsg, toKeys)
     } catch (err) {
-      let jwsChecked = this.verifyContent(packedMsg)
+      const jwsChecked = this.verifyContent(packedMsg)
       return {
         message: jwsChecked.content,
         recipientKey: null,
@@ -127,10 +127,10 @@ export class DIDComm {
     recipientKeys: Uint8Array[],
     fromKeys: sodium.KeyPair | null = null,
   ): Promise<string> {
-    let [recipsJson, cek] = this.prepareRecipientKeys(recipientKeys, fromKeys)
-    let recipsB64 = this.b64url(recipsJson)
+    const [recipsJson, cek] = this.prepareRecipientKeys(recipientKeys, fromKeys)
+    const recipsB64 = this.b64url(recipsJson)
 
-    let [ciphertext, tag, iv] = this.encryptPlaintext(msg, recipsB64, cek)
+    const [ciphertext, tag, iv] = this.encryptPlaintext(msg, recipsB64, cek)
 
     return JSON.stringify({
       ciphertext: this.b64url(ciphertext),
@@ -153,25 +153,25 @@ export class DIDComm {
     if (typeof toKeys.privateKey === 'string') {
       toKeys.privateKey = Base58.decode(toKeys.privateKey)
     }
-    let recipsJson = this.strB64dec(wrapper.protected)
-    let recipsOuter = JSON.parse(recipsJson)
+    const recipsJson = this.strB64dec(wrapper.protected)
+    const recipsOuter = JSON.parse(recipsJson)
 
-    let alg = recipsOuter.alg
-    let isAuthcrypt = alg === 'Authcrypt'
+    const alg = recipsOuter.alg
+    const isAuthcrypt = alg === 'Authcrypt'
     if (!isAuthcrypt && alg !== 'Anoncrypt') {
       throw new Error('Unsupported pack algorithm: ' + alg)
     }
-    let [cek, senderVk, recipVk] = this.locateRecKey(recipsOuter.recipients, toKeys)
+    const [cek, senderVk, recipVk] = this.locateRecKey(recipsOuter.recipients, toKeys)
     if (!senderVk && isAuthcrypt) {
       throw new Error('Sender public key not provided in Authcrypt message')
     }
-    let ciphertext = this.b64dec(wrapper.ciphertext)
-    let nonce = this.b64dec(wrapper.iv)
-    let tag = this.b64dec(wrapper.tag)
+    const ciphertext = this.b64dec(wrapper.ciphertext)
+    const nonce = this.b64dec(wrapper.iv)
+    const tag = this.b64dec(wrapper.tag)
 
-    let message = this.decryptPlaintext(ciphertext, tag, wrapper.protected, nonce, cek)
+    const message = this.decryptPlaintext(ciphertext, tag, wrapper.protected, nonce, cek)
     try {
-      let jwsVerified = this.verifyContent(message)
+      const jwsVerified = this.verifyContent(message)
       return {
         message: jwsVerified.content,
         recipientKey: recipVk,
@@ -190,30 +190,30 @@ export class DIDComm {
 
   private async signContent(msg: string, signerKeyPair: sodium.KeyPair): Promise<string> {
     // get public key base58 encoded
-    let senderVk = Base58.encode(signerKeyPair.publicKey)
+    const senderVk = Base58.encode(signerKeyPair.publicKey)
 
     // generate jose header, b64url encode it, and concat to b64url encoded payload
-    let joseHeader = {
+    const joseHeader = {
       alg: 'EdDSA',
       kid: senderVk,
     }
-    let joseString = JSON.stringify(joseHeader)
-    let b64JoseStr = this.b64url(joseString)
-    let b64Payload = this.b64url(msg)
-    let headerAndPayloadConcat = `${b64JoseStr}.${b64Payload}`
+    const joseString = JSON.stringify(joseHeader)
+    const b64JoseStr = this.b64url(joseString)
+    const b64Payload = this.b64url(msg)
+    const headerAndPayloadConcat = `${b64JoseStr}.${b64Payload}`
 
     //sign data and return compact JWS
-    let signature = this.b64url(sodium.crypto_sign(headerAndPayloadConcat, signerKeyPair.privateKey))
+    const signature = this.b64url(sodium.crypto_sign(headerAndPayloadConcat, signerKeyPair.privateKey))
     return `${headerAndPayloadConcat}.${signature}`
   }
 
   private verifyContent(jws: string): JWSUnpacked {
-    let jwsSplit = jws.split('.')
-    let joseHeader = JSON.parse(this.strB64dec(jwsSplit[0]))
+    const jwsSplit = jws.split('.')
+    const joseHeader = JSON.parse(this.strB64dec(jwsSplit[0]))
     if (joseHeader.alg != 'EdDSA') {
       throw 'Cryptographic algorithm unidentifiable'
     }
-    let sigMsg = sodium.crypto_sign_open(this.b64dec(jwsSplit[2]), Base58.decode(joseHeader.kid))
+    const sigMsg = sodium.crypto_sign_open(this.b64dec(jwsSplit[2]), Base58.decode(joseHeader.kid))
 
     return {
       content: this.strB64dec(jwsSplit[1]),
@@ -235,8 +235,14 @@ export class DIDComm {
   }
 
   private encryptPlaintext(message: any, addData: any, key: any) {
-    let iv = this.sodium.randombytes_buf(this.sodium.crypto_aead_chacha20poly1305_ietf_NPUBBYTES)
-    let out = this.sodium.crypto_aead_chacha20poly1305_ietf_encrypt_detached(message, addData, null, iv, key)
+    const iv = this.sodium.randombytes_buf(this.sodium.crypto_aead_chacha20poly1305_ietf_NPUBBYTES)
+    const out = this.sodium.crypto_aead_chacha20poly1305_ietf_encrypt_detached(
+      message,
+      addData,
+      null,
+      iv,
+      key,
+    )
     return [out.ciphertext, out.mac, iv]
   }
 
@@ -254,19 +260,19 @@ export class DIDComm {
   }
 
   private prepareRecipientKeys(toKeys: any, fromKeys: any = null) {
-    let cek = this.sodium.crypto_aead_chacha20poly1305_ietf_keygen()
-    let recips: any[] = []
+    const cek = this.sodium.crypto_aead_chacha20poly1305_ietf_keygen()
+    const recips: any[] = []
 
     toKeys.forEach((targetVk: any) => {
       let encCek = null
       let encSender = null
       let nonce = null
 
-      let targetPk = this.sodium.crypto_sign_ed25519_pk_to_curve25519(targetVk)
+      const targetPk = this.sodium.crypto_sign_ed25519_pk_to_curve25519(targetVk)
 
       if (fromKeys) {
-        let senderVk = Base58.encode(fromKeys.publicKey)
-        let senderSk = this.sodium.crypto_sign_ed25519_sk_to_curve25519(fromKeys.privateKey)
+        const senderVk = Base58.encode(fromKeys.publicKey)
+        const senderSk = this.sodium.crypto_sign_ed25519_sk_to_curve25519(fromKeys.privateKey)
         encSender = this.sodium.crypto_box_seal(senderVk, targetPk)
 
         nonce = this.sodium.randombytes_buf(this.sodium.crypto_box_NONCEBYTES)
@@ -285,7 +291,7 @@ export class DIDComm {
       })
     })
 
-    let data = {
+    const data = {
       alg: fromKeys ? 'Authcrypt' : 'Anoncrypt',
       enc: 'chacha20poly1305_ietf',
       recipients: recips,
@@ -295,30 +301,30 @@ export class DIDComm {
   }
 
   private locateRecKey(recipients: any, keys: any) {
-    let notFound = []
+    const notFound = []
     /* tslint:disable */
-    for (let index in recipients) {
-      let recip = recipients[index]
+    for (const index in recipients) {
+      const recip = recipients[index]
       if (!('header' in recip) || !('encrypted_key' in recip)) {
         throw new Error('Invalid recipient header')
       }
 
-      let recipVk = Base58.decode(recip.header.kid)
+      const recipVk = Base58.decode(recip.header.kid)
       if (!this.sodium.memcmp(recipVk, keys.publicKey)) {
         notFound.push(recip.header.kid)
       }
-      let pk = this.sodium.crypto_sign_ed25519_pk_to_curve25519(keys.publicKey)
-      let sk = this.sodium.crypto_sign_ed25519_sk_to_curve25519(keys.privateKey)
+      const pk = this.sodium.crypto_sign_ed25519_pk_to_curve25519(keys.publicKey)
+      const sk = this.sodium.crypto_sign_ed25519_sk_to_curve25519(keys.privateKey)
 
-      let encrytpedKey = this.b64dec(recip.encrypted_key)
-      let nonce = recip.header.iv ? this.b64dec(recip.header.iv) : null
-      let encSender = recip.header.sender ? this.b64dec(recip.header.sender) : null
+      const encrytpedKey = this.b64dec(recip.encrypted_key)
+      const nonce = recip.header.iv ? this.b64dec(recip.header.iv) : null
+      const encSender = recip.header.sender ? this.b64dec(recip.header.sender) : null
 
       let senderVk = null
       let cek = null
       if (nonce && encSender) {
         senderVk = this.sodium.to_string(this.sodium.crypto_box_seal_open(encSender, pk, sk))
-        let senderPk = this.sodium.crypto_sign_ed25519_pk_to_curve25519(Base58.decode(senderVk))
+        const senderPk = this.sodium.crypto_sign_ed25519_pk_to_curve25519(Base58.decode(senderVk))
         cek = this.sodium.crypto_box_open_easy(encrytpedKey, nonce, senderPk, sk)
       } else {
         cek = this.sodium.crypto_box_seal_open(encrytpedKey, pk, sk)

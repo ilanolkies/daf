@@ -19,4 +19,4 @@ export abstract class AbstractIdentityProvider extends EventEmitter {
 }
 
 type AbstractIdentityProviderClass = typeof AbstractIdentityProvider
-export interface IdentityProviderDerived extends AbstractIdentityProviderClass {}
+export type IdentityProviderDerived = AbstractIdentityProviderClass

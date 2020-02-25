@@ -14,4 +14,4 @@ export abstract class AbstractServiceController extends EventEmitter {
 }
 
 type AbstractServiceControllerClass = typeof AbstractServiceController
-export interface ServiceControllerDerived extends AbstractServiceControllerClass {}
+export type ServiceControllerDerived = AbstractServiceControllerClass
