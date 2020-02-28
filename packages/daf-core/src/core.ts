@@ -55,15 +55,15 @@ export class Core extends EventEmitter {
     this.actionHandler = config.actionHandler
   }
 
-  async setupServices() {
+  async setupServices(): Promise<void> {
     const identities = await this.identityManager.getIdentities()
     await this.serviceManager.setupServices(identities)
   }
 
-  async listen() {
+  async listen(): Promise<void> {
     debug('Listening for new messages')
     this.serviceManager.on(ServiceEventTypes.NewMessages, this.validateMessages.bind(this))
-    this.serviceManager.listen()
+    await this.serviceManager.listen()
   }
 
   async getMessagesSince(ts: LastMessageTimestampForInstance[]): Promise<Message[]> {

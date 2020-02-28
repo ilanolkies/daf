@@ -10,7 +10,7 @@ export abstract class AbstractServiceController extends EventEmitter {
   abstract ready: Promise<boolean> // you cannot have an async constructor
   abstract instanceId(): { did: string; type: string; id: string }
   abstract getMessagesSince(timestamp: number): Promise<Message[]>
-  abstract listen(): void
+  abstract listen(): Promise<boolean>
 }
 
 type AbstractServiceControllerClass = typeof AbstractServiceController

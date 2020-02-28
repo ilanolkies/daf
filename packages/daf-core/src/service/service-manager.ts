@@ -49,9 +49,9 @@ export class ServiceManager extends EventEmitter {
     this.emit(ServiceEventTypes.NewMessages, messages)
   }
 
-  listen() {
+  async listen() {
     for (const instance of this.controllerInstances) {
-      instance.listen()
+      await instance.listen()
     }
   }
 
